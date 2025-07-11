@@ -27,10 +27,34 @@ app.get("/", (req, res) => {
   res.status(200).json({
     message: "Que Aula API está funcionando!",
     version: "1.0.0",
+    lastUpdate: new Date().toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+    }),
     endpoints: {
       classes: "/classes",
       flowchart: "/flowchart",
+      info: "/info",
     },
+  });
+});
+
+app.get("/info", (req, res) => {
+  const classes = require("./data/classes.json");
+  const flowchart = require("./data/flowchart.json");
+
+  res.status(200).json({
+    message: "Informações da API Que Aula",
+    stats: {
+      totalClasses: classes.length,
+      totalFlowchartSemesters: flowchart.length,
+      totalFlowchartSubjects: flowchart.flat().filter((item) => item.name)
+        .length,
+    },
+    lastCheck: new Date().toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+    }),
+    guideUrl:
+      "https://github.com/johncobain/Que-Aula-Api/blob/main/DADOS-GUIA.md",
   });
 });
 
