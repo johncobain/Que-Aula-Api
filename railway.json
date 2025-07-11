@@ -1,9 +1,5 @@
 {
-  "build": {
-    "builder": "@railway/nixpacks"
-  },
   "deploy": {
-    "startCommand": "node src/app.js",
-    "restartPolicyType": "on-failure"
+    "startCommand": "node src/app.js"
   }
 }
