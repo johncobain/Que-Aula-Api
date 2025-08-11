@@ -1,5 +1,0 @@
-{
-  "deploy": {
-    "startCommand": "node src/app.js"
-  }
-}

@@ -302,15 +302,28 @@ const flowchartSubject = await fetch("/flowchart/INF027").then((res) =>
 
 ## 🚀 Deploy
 
-### Railway
+### Vercel
 
-Esta API está configurada para deploy no [**Railway**](https://railway.app).
+Esta API está configurada para deploy no [**Vercel**](https://vercel.com).
+
+#### Deploy automático
+
+- Conecte o repositório GitHub ao Vercel
+- Cada push para a branch main será automaticamente deployed
+
+#### Deploy manual
+
+```bash
+npm install -g vercel
+vercel login
+vercel --prod
+```
 
 ### Configurações de Produção
 
 - ✅ **CORS configurado** para permitir acesso do frontend
 - ✅ **Health check** disponível em `/`
-- ✅ **Variável PORT** configurada para plataformas de cloud
+- ✅ **Serverless functions** otimizadas para Vercel
 
 ## 📞 Suporte
 
