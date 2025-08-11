@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 const express = require("express");
 
 const classesRouter = require("./routes/classes");
@@ -61,8 +65,9 @@ app.get("/info", (req, res) => {
 app.use("/classes", classesRouter);
 app.use("/flowchart", flowchartRouter);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, console.log(`Servidor escutando na porta ${PORT}`));
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Servidor escutando na porta ${PORT}`));
+}
 
 module.exports = app;
