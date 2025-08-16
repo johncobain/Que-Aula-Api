@@ -3,8 +3,16 @@
   "version": "1.1.0",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "npm run services:up && npm run services:wait:database && npm run migrations:up && nodemon src/app.js",
+    "services:up": "docker compose -f infra/compose.yaml up -d",
+    "services:stop": "docker compose -f infra/compose.yaml stop",
+    "services:down": "docker compose -f infra/compose.yaml down",
+    "services:wait:database": "node infra/scripts/wait-for-postgres.js",
+    "postgres:down": "sudo systemctl stop postgresql",
+    "migrations:create": "node-pg-migrate -m infra/migrations create",
+    "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env up",
+    "migrations:prod": "node infra/scripts/run-production-migrations.js",
+    "test:connection": "node infra/scripts/test-connection.js"
   },
   "keywords": [],
   "author": "",
@@ -12,9 +20,14 @@
   "description": "",
   "dependencies": {
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "node-pg-migrate": "^7.9.1",
+    "nodemon": "^3.1.10",
+    "sequelize-cli": "^6.6.3"
   }
 }
