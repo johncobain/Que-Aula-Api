@@ -1,5 +1,5 @@
-import { Client } from "pg";
-import { ServiceError } from "./errors.js";
+const { Client } = require("pg");
+const { ServiceError } = require("./errors.js");
 
 async function query(queryObject) {
   let client;
@@ -37,7 +37,6 @@ const database = {
   query,
   getNewClient,
 };
-export default database;
 
 function getSSLValues() {
   if (process.env.NODE_ENV === "production") {
@@ -47,3 +46,5 @@ function getSSLValues() {
   }
   return false;
 }
+
+module.exports = database;

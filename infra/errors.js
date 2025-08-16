@@ -1,4 +1,4 @@
-export class InternalServerError extends Error {
+class InternalServerError extends Error {
   constructor({ cause, statusCode }) {
     super("Um erro interno não esperado aconteceu.", {
       cause,
@@ -18,7 +18,7 @@ export class InternalServerError extends Error {
   }
 }
 
-export class ServiceError extends Error {
+class ServiceError extends Error {
   constructor({ cause, message }) {
     super(message || "Serviço indisponível no momento.", {
       cause,
@@ -38,7 +38,7 @@ export class ServiceError extends Error {
   }
 }
 
-export class ValidationError extends Error {
+class ValidationError extends Error {
   constructor({ cause, message, action }) {
     super(message || "Um erro de validação ocorreu.", {
       cause,
@@ -58,7 +58,7 @@ export class ValidationError extends Error {
   }
 }
 
-export class NotFoundError extends Error {
+class NotFoundError extends Error {
   constructor({ cause, message, action }) {
     super(message || "Não foi possível encontrar este recurso no sistema.", {
       cause,
@@ -78,7 +78,8 @@ export class NotFoundError extends Error {
     };
   }
 }
-export class UnauthorizedError extends Error {
+
+class UnauthorizedError extends Error {
   constructor({ cause, message, action }) {
     super(message || "Usuário não autenticado.", {
       cause,
@@ -98,7 +99,7 @@ export class UnauthorizedError extends Error {
   }
 }
 
-export class MethodNotAllowedError extends Error {
+class MethodNotAllowedError extends Error {
   constructor() {
     super("Método não permitido para esse endpoint.");
     this.name = "MethodNotAllowedError";
@@ -116,3 +117,12 @@ export class MethodNotAllowedError extends Error {
     };
   }
 }
+
+module.exports = {
+  InternalServerError,
+  ServiceError,
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  MethodNotAllowedError,
+};

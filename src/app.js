@@ -6,6 +6,7 @@ const express = require("express");
 
 const classesRouter = require("./routes/classes");
 const flowchartRouter = require("./routes/flowchart");
+const migrationsRouter = require("./routes/migrations");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
       classes: "/classes",
       flowchart: "/flowchart",
       info: "/info",
+      migrations: "/migrations",
     },
   });
 });
@@ -64,6 +66,7 @@ app.get("/info", (req, res) => {
 
 app.use("/classes", classesRouter);
 app.use("/flowchart", flowchartRouter);
+app.use("/migrations", migrationsRouter);
 
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const PORT = process.env.PORT || 3000;
