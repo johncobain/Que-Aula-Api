@@ -1,15 +1,31 @@
-const list = (req, res) => {
-  const classes = require("../data/classes.json");
-  return res.status(200).json(classes);
+const Subject = require("../models/Subject");
+const ClassTransformer = require("../services/classTransformer");
+
+const list = async (req, res) => {
+  try {
+    const dbRows = await Subject.findAll();
+    const classes = ClassTransformer.transformToFrontendFormat(dbRows);
+    return res.status(200).json(classes);
+  } catch (error) {
+    console.error("Error fetching subjects:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
-const get = (req, res) => {
-  const { className } = req.params;
-  const classes = require("../data/classes.json");
-  const classData = classes.find(
-    (c) => c.name?.toLowerCase() === className.toLowerCase()
-  );
-  return res.status(200).json(classData || { error: "Class not found" });
+const get = async (req, res) => {
+  try {
+    const { className } = req.params;
+    const dbRows = await Subject.findByCode(className);
+    const classData = ClassTransformer.transformSingleSubject(dbRows);
+
+    if (!classData) {
+      return res.status(404).json({ error: "Class not found" });
+    }
+    return res.status(200).json(classData);
+  } catch (error) {
+    console.error("Error fetching class:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 module.exports = {

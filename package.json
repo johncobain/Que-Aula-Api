@@ -11,8 +11,8 @@
     "postgres:down": "sudo systemctl stop postgresql",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env up",
-    "migrations:prod": "node infra/scripts/run-production-migrations.js",
-    "test:connection": "node infra/scripts/test-connection.js"
+    "test:connection": "node infra/scripts/test-connection.js",
+    "populate:db": "node infra/scripts/populate-database.js"
   },
   "keywords": [],
   "author": "",
