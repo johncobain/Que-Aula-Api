@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
+const { version } = require("../package.json");
 
 const classesRouter = require("./routes/classes");
 const flowchartRouter = require("./routes/flowchart");
@@ -31,7 +32,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Que Aula API está funcionando!",
-    version: process.env.npm_package_version,
+    version: version,
     lastUpdate: new Date().toLocaleString("pt-BR", {
       timeZone: "America/Sao_Paulo",
     }),
