@@ -31,7 +31,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Que Aula API está funcionando!",
-    version: "1.0.0",
+    version: process.env.npm_package_version,
     lastUpdate: new Date().toLocaleString("pt-BR", {
       timeZone: "America/Sao_Paulo",
     }),
