@@ -12,7 +12,8 @@
     "migrations:create": "node-pg-migrate -m infra/migrations create",
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env up",
     "test:connection": "node infra/scripts/test-connection.js",
-    "populate:db": "node infra/scripts/populate-database.js"
+    "populate:db": "node infra/scripts/populate-database.js",
+    "clean:db": "node infra/scripts/clean-database.js"
   },
   "keywords": [],
   "author": "",
