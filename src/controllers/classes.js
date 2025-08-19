@@ -80,8 +80,32 @@ const create = async (req, res) => {
   }
 };
 
+const deleteClass = async (req, res) => {
+  try {
+    const { className } = req.params;
+    if (!className) {
+      console.error("Class name is required for deletion");
+      return res.status(400).json({ error: "Class name is required" });
+    }
+
+    const classData = await Subject.findByCode(className);
+    if (!classData || classData.length === 0) {
+      console.error(`Class ${className} not found`);
+      return res.status(404).json({ error: "Class not found" });
+    }
+
+    await Subject.delete(className);
+    console.log(`Class ${className} deleted successfully`);
+    return res.status(204).json({ message: "Class deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting class:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   list,
   get,
   create,
+  delete: deleteClass,
 };

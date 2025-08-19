@@ -262,6 +262,20 @@ class Subject {
       }
     }
   }
+
+  static async delete(code) {
+    const client = await database.getNewClient();
+    await client.query("DELETE FROM subjects WHERE code = $1", [code]);
+    await client.query(
+      "DELETE FROM class_groups WHERE subject_id IN (SELECT id FROM subjects WHERE code = $1)",
+      [code]
+    );
+    await client.query(
+      "DELETE FROM class_schedules WHERE subject_id IN (SELECT id FROM subjects WHERE code = $1)",
+      [code]
+    );
+    await client.query("DELETE FROM subjects WHERE code = $1", [code]);
+  }
 }
 
 module.exports = Subject;
