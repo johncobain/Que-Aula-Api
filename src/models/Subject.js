@@ -276,6 +276,225 @@ class Subject {
     );
     await client.query("DELETE FROM subjects WHERE code = $1", [code]);
   }
+
+  static async update(code, updateData) {
+    let client;
+    const results = {
+      updated: null,
+      errors: [],
+    };
+
+    try {
+      client = await database.getNewClient();
+      await client.query("BEGIN");
+
+      const existingSubject = await client.query(
+        "SELECT id FROM subjects WHERE LOWER(code) = LOWER($1)",
+        [code]
+      );
+
+      if (existingSubject.rows.length === 0) {
+        results.errors.push({
+          name: code,
+          reason: "Subject not found",
+        });
+        return results;
+      }
+
+      const subjectId = existingSubject.rows[0].id;
+
+      const updateFields = [];
+      const updateValues = [];
+      let paramCount = 1;
+
+      if (updateData.description !== undefined) {
+        updateFields.push(`name = $${paramCount}`);
+        updateValues.push(updateData.description);
+        paramCount++;
+      }
+
+      if (updateData.semester !== undefined) {
+        updateFields.push(`semester = $${paramCount}`);
+        updateValues.push(updateData.semester);
+        paramCount++;
+      }
+
+      if (updateData.multiClass !== undefined) {
+        updateFields.push(`multi_class = $${paramCount}`);
+        updateValues.push(updateData.multiClass);
+        paramCount++;
+      }
+
+      if (updateData.greve !== undefined) {
+        updateFields.push(`on_strike = $${paramCount}`);
+        updateValues.push(updateData.greve);
+        paramCount++;
+      }
+
+      updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+
+      if (updateFields.length > 1) {
+        updateValues.push(code);
+        const updateQuery = `
+          UPDATE subjects 
+          SET ${updateFields.join(", ")} 
+          WHERE LOWER(code) = LOWER($${paramCount})
+        `;
+
+        await client.query(updateQuery, updateValues);
+      }
+
+      if (updateData.classList !== undefined) {
+        await client.query(
+          "DELETE FROM class_schedules WHERE class_group_id IN (SELECT id FROM class_groups WHERE subject_id = $1)",
+          [subjectId]
+        );
+        await client.query("DELETE FROM class_groups WHERE subject_id = $1", [
+          subjectId,
+        ]);
+
+        const classGroupsMap = new Map();
+
+        if (
+          updateData.multiClass &&
+          updateData.classList &&
+          updateData.classList.length > 0
+        ) {
+          for (const groupCode of updateData.classList) {
+            const groupResult = await client.query(
+              "INSERT INTO class_groups (subject_id, group_code) VALUES ($1, $2) RETURNING id",
+              [subjectId, groupCode]
+            );
+            classGroupsMap.set(groupCode, groupResult.rows[0].id);
+          }
+        } else {
+          const groupResult = await client.query(
+            "INSERT INTO class_groups (subject_id, group_code) VALUES ($1, $2) RETURNING id",
+            [subjectId, "DEFAULT"]
+          );
+          classGroupsMap.set("DEFAULT", groupResult.rows[0].id);
+        }
+      }
+
+      if (updateData.classes !== undefined) {
+        const classGroupsResult = await client.query(
+          "SELECT id, group_code FROM class_groups WHERE subject_id = $1",
+          [subjectId]
+        );
+
+        const classGroupsMap = new Map();
+        classGroupsResult.rows.forEach((row) => {
+          classGroupsMap.set(row.group_code, row.id);
+        });
+
+        await client.query(
+          "DELETE FROM class_schedules WHERE subject_id = $1",
+          [subjectId]
+        );
+
+        const teachersMap = new Map();
+        const classroomsMap = new Map();
+
+        for (const schedule of updateData.classes) {
+          if (!teachersMap.has(schedule.teacher)) {
+            const existingTeacher = await client.query(
+              "SELECT id FROM teachers WHERE name = $1",
+              [schedule.teacher]
+            );
+
+            if (existingTeacher.rows.length > 0) {
+              teachersMap.set(schedule.teacher, existingTeacher.rows[0].id);
+            } else {
+              const teacherResult = await client.query(
+                "INSERT INTO teachers (name) VALUES ($1) RETURNING id",
+                [schedule.teacher]
+              );
+              teachersMap.set(schedule.teacher, teacherResult.rows[0].id);
+            }
+          }
+
+          if (!classroomsMap.has(schedule.classroom)) {
+            const existingClassroom = await client.query(
+              "SELECT id FROM classrooms WHERE name = $1",
+              [schedule.classroom]
+            );
+
+            if (existingClassroom.rows.length > 0) {
+              classroomsMap.set(
+                schedule.classroom,
+                existingClassroom.rows[0].id
+              );
+            } else {
+              const classroomResult = await client.query(
+                "INSERT INTO classrooms (name) VALUES ($1) RETURNING id",
+                [schedule.classroom]
+              );
+              classroomsMap.set(schedule.classroom, classroomResult.rows[0].id);
+            }
+          }
+
+          const groupCode = schedule.whichClass || "DEFAULT";
+          const classGroupId = classGroupsMap.get(groupCode);
+
+          if (!classGroupId) {
+            results.errors.push({
+              name: code,
+              reason: `Class group '${groupCode}' not found for schedule`,
+            });
+            continue;
+          }
+
+          const teacherId = teachersMap.get(schedule.teacher);
+          const classroomId = classroomsMap.get(schedule.classroom);
+
+          const startPeriod = parseInt(schedule.period[0]);
+          const endPeriod = parseInt(
+            schedule.period[schedule.period.length - 1]
+          );
+
+          await client.query(
+            `
+            INSERT INTO class_schedules (
+              subject_id, class_group_id, teacher_id, classroom_id,
+              week_day, start_period, end_period
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+          `,
+            [
+              subjectId,
+              classGroupId,
+              teacherId,
+              classroomId,
+              parseInt(schedule.weekDay),
+              startPeriod,
+              endPeriod,
+            ]
+          );
+        }
+      }
+
+      const updatedSubject = await this.findByCode(code);
+
+      results.updated = {
+        name: code,
+        description: updateData.description,
+        semester: updateData.semester,
+        schedules: updateData.classes ? updateData.classes.length : null,
+      };
+
+      await client.query("COMMIT");
+      return results;
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
+      throw error;
+    } finally {
+      if (client) {
+        await client.end();
+      }
+    }
+  }
 }
 
 module.exports = Subject;

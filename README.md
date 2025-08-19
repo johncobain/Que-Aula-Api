@@ -299,6 +299,83 @@ Creates new subjects in the database. Accepts both array format and wrapped obje
 }
 ```
 
+#### `PUT /classes/:className` or `PATCH /classes/:className`
+
+Updates an existing subject. You can update basic information, class groups, or schedules.
+
+**Parameters:**
+
+- `className` - Subject code (e.g., "INF027")
+
+**Request Body (Partial Update):**
+
+```json
+{
+  "description": "Updated Subject Name",
+  "semester": "2",
+  "greve": true
+}
+```
+
+**Request Body (Update with Schedules):**
+
+```json
+{
+  "description": "Advanced Programming",
+  "multiClass": true,
+  "classList": ["T01", "T02", "T03"],
+  "classes": [
+    {
+      "weekDay": "1",
+      "period": ["2", "3"],
+      "teacher": "New Teacher",
+      "classroom": "New Room",
+      "whichClass": "T01"
+    }
+  ]
+}
+```
+
+**Success Response:**
+
+```json
+{
+  "message": "Subject updated successfully",
+  "subject": {
+    "name": "INF027",
+    "description": "Advanced Programming",
+    "semester": "2",
+    "multiClass": true,
+    "classList": ["T01", "T02", "T03"],
+    "greve": false,
+    "classes": [
+      {
+        "weekDay": "1",
+        "period": ["2", "3"],
+        "teacher": "New Teacher",
+        "classroom": "New Room",
+        "whichClass": "T01"
+      }
+    ]
+  },
+  "updated": {
+    "name": "INF027",
+    "description": "Advanced Programming",
+    "semester": "2",
+    "schedules": 1
+  }
+}
+```
+
+**Error Response:**
+
+```json
+{
+  "error": "Not Found",
+  "message": "Subject 'INF999' not found"
+}
+```
+
 ### 📊 Flowchart Endpoints
 
 #### `GET /flowchart`

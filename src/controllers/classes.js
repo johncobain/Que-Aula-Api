@@ -80,26 +80,106 @@ const create = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    const { className } = req.params;
+
+    if (!className) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Class name is required",
+      });
+    }
+
+    const updateData = req.body;
+    const allowedFields = [
+      "description",
+      "semester",
+      "multiClass",
+      "greve",
+      "classes",
+      "classList",
+    ];
+    const providedFields = Object.keys(updateData).filter((field) =>
+      allowedFields.includes(field)
+    );
+
+    if (providedFields.length === 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "At least one field must be provided for update",
+        allowedFields: allowedFields,
+      });
+    }
+
+    const existingSubject = await Subject.findByCode(className);
+    if (!existingSubject || existingSubject.length === 0) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: `Subject '${className}' not found`,
+      });
+    }
+
+    const results = await Subject.update(className, updateData);
+
+    if (results.errors.length > 0) {
+      return res.status(400).json({
+        error: "Update Failed",
+        message: "Failed to update subject",
+        errors: results.errors,
+      });
+    }
+
+    const updatedSubjectData = await Subject.findByCode(className);
+    const transformedSubject =
+      ClassTransformer.transformSingleSubject(updatedSubjectData);
+
+    return res.status(200).json({
+      message: "Subject updated successfully",
+      subject: transformedSubject,
+      updated: results.updated,
+    });
+  } catch (error) {
+    console.error("Error updating subject:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to update subject",
+      details: error.message,
+    });
+  }
+};
+
 const deleteClass = async (req, res) => {
   try {
     const { className } = req.params;
+
     if (!className) {
-      console.error("Class name is required for deletion");
-      return res.status(400).json({ error: "Class name is required" });
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Class name is required",
+      });
     }
 
     const classData = await Subject.findByCode(className);
     if (!classData || classData.length === 0) {
-      console.error(`Class ${className} not found`);
-      return res.status(404).json({ error: "Class not found" });
+      return res.status(404).json({
+        error: "Not Found",
+        message: `Subject '${className}' not found`,
+      });
     }
 
     await Subject.delete(className);
-    console.log(`Class ${className} deleted successfully`);
-    return res.status(204).json({ message: "Class deleted successfully" });
+
+    return res.status(200).json({
+      message: `Subject '${className}' deleted successfully`,
+    });
   } catch (error) {
-    console.error("Error deleting class:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error deleting subject:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to delete subject",
+      details: error.message,
+    });
   }
 };
 
@@ -107,5 +187,6 @@ module.exports = {
   list,
   get,
   create,
+  update,
   delete: deleteClass,
 };
