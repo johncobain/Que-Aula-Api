@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
+const { version } = require("../package.json");
 
 const classesRouter = require("./routes/classes");
 const flowchartRouter = require("./routes/flowchart");
@@ -10,10 +11,13 @@ const migrationsRouter = require("./routes/migrations");
 
 const app = express();
 
-// Middleware para CORS
+// Middleware for CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -30,37 +34,22 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "Que Aula API está funcionando!",
-    version: "1.0.0",
-    lastUpdate: new Date().toLocaleString("pt-BR", {
+    message: "Que Aula API is running!",
+    version: version,
+    lastUpdate: new Date().toLocaleString("en-US", {
       timeZone: "America/Sao_Paulo",
     }),
+    architecture: {
+      database: "PostgreSQL (Neon)",
+      fallback: "JSON files",
+      deployment: "Vercel Serverless",
+    },
     endpoints: {
-      classes: "/classes",
-      flowchart: "/flowchart",
-      info: "/info",
-      migrations: "/migrations",
+      classes: "/classes (GET, POST, PUT, PATCH, DELETE)",
+      flowchart: "/flowchart (GET)",
+      migrations: "/migrations (GET, POST)",
     },
-  });
-});
-
-app.get("/info", (req, res) => {
-  const classes = require("./data/classes.json");
-  const flowchart = require("./data/flowchart.json");
-
-  res.status(200).json({
-    message: "Informações da API Que Aula",
-    stats: {
-      totalClasses: classes.length,
-      totalFlowchartSemesters: flowchart.length,
-      totalFlowchartSubjects: flowchart.flat().filter((item) => item.name)
-        .length,
-    },
-    lastCheck: new Date().toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-    }),
-    guideUrl:
-      "https://github.com/johncobain/Que-Aula-Api/blob/main/DADOS-GUIA.md",
+    guideUrl: "https://github.com/johncobain/Que-Aula-Api/blob/main/GUIDE.md",
   });
 });
 
@@ -70,7 +59,7 @@ app.use("/migrations", migrationsRouter);
 
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Servidor escutando na porta ${PORT}`));
+  app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
 }
 
 module.exports = app;

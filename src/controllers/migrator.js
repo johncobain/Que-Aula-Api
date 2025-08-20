@@ -1,6 +1,6 @@
 const { default: migrationRunner } = require("node-pg-migrate");
 const { resolve } = require("node:path");
-const database = require("../infra/database.js");
+const database = require("../../infra/database.js");
 
 const defaultMigrationsOptions = {
   dryRun: true,

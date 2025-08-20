@@ -1,5 +1,5 @@
 const express = require("express");
-const migrator = require("../../models/migrator");
+const controller = require("../controllers/migrator");
 
 const router = express.Router();
 
@@ -8,7 +8,7 @@ router.post("/", postHandler);
 
 async function getHandler(request, response) {
   try {
-    const pendingMigrations = await migrator.listPendingMigrations();
+    const pendingMigrations = await controller.listPendingMigrations();
     return response.status(200).json(pendingMigrations);
   } catch (error) {
     console.error("Error listing migrations:", error);
@@ -18,7 +18,7 @@ async function getHandler(request, response) {
 
 async function postHandler(request, response) {
   try {
-    const migratedMigrations = await migrator.runPendingMigrations();
+    const migratedMigrations = await controller.runPendingMigrations();
 
     if (migratedMigrations.length > 0) {
       return response.status(201).json(migratedMigrations);

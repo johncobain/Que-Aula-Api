@@ -1,6 +1,6 @@
 {
   "name": "que-aula-api",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "main": "src/app.js",
   "scripts": {
     "dev": "npm run services:up && npm run services:wait:database && npm run migrations:up && nodemon src/app.js",
@@ -11,8 +11,9 @@
     "postgres:down": "sudo systemctl stop postgresql",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env up",
-    "migrations:prod": "node infra/scripts/run-production-migrations.js",
-    "test:connection": "node infra/scripts/test-connection.js"
+    "test:connection": "node infra/scripts/test-connection.js",
+    "populate:db": "node infra/scripts/populate-database.js",
+    "clean:db": "node infra/scripts/clean-database.js"
   },
   "keywords": [],
   "author": "",
