@@ -13,7 +13,9 @@
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env up",
     "test:connection": "node infra/scripts/test-connection.js",
     "populate:db": "node infra/scripts/populate-database.js",
-    "clean:db": "node infra/scripts/clean-database.js"
+    "clean:db": "node infra/scripts/clean-database.js",
+    "populate:api": "curl -X POST http://localhost:3000/classes/populate",
+    "clean:api": "curl -X DELETE http://localhost:3000/classes/clean"
   },
   "keywords": [],
   "author": "",

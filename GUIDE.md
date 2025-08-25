@@ -47,6 +47,18 @@ The API now uses a **PostgreSQL database** as the primary data source. Here are 
    curl -X DELETE https://que-aula-api.vercel.app/classes/INF027
    ```
 
+4. **Populate database from JSON:**
+
+   ```bash
+   curl -X POST https://que-aula-api.vercel.app/classes/populate
+   ```
+
+5. **Clean database:**
+
+   ```bash
+   curl -X DELETE https://que-aula-api.vercel.app/classes/clean
+   ```
+
 #### Method 2: Database Direct Access
 
 1. **Access Neon Console:**
@@ -185,10 +197,59 @@ The API now uses a **PostgreSQL database** as the primary data source. Here are 
 }
 ```
 
+### 🔧 Quick Data Management
+
+For immediate data updates, you can use these API endpoints:
+
+#### Reset and Populate Database
+
+```bash
+# Clean all data and repopulate from classes.json
+curl -X POST https://que-aula-api.vercel.app/classes/populate
+
+# Response example:
+{
+  "message": "Database populated successfully from classes.json",
+  "summary": {
+    "subjects": 38,
+    "teachers": 45,
+    "classrooms": 25,
+    "classGroups": 42,
+    "schedules": 156
+  },
+  "created": 38,
+  "errors": 0
+}
+```
+
+#### Clean Database Only
+
+```bash
+# Remove all data (use with caution!)
+curl -X DELETE https://que-aula-api.vercel.app/classes/clean
+
+# Response:
+{
+  "message": "Database cleaned successfully",
+  "timestamp": "2024-08-24T10:30:00.000Z"
+}
+```
+
+#### Bulk Import New Data
+
+```bash
+# Import multiple subjects at once
+curl -X POST https://que-aula-api.vercel.app/classes \
+  -H "Content-Type: application/json" \
+  -d @path/to/new-subjects.json
+```
+
 ### ⚡ Important tips
 
 - **Database-first approach**: The API primarily uses PostgreSQL database
 - **Use API endpoints**: Preferred method for data updates
+- **Populate endpoint**: Automatically reads from `src/data/classes.json`
+- **Clean before populate**: The populate endpoint automatically cleans first
 - **Test locally first**: Always test changes before production
 - **Use descriptive commits**: For easy change tracking
 - **Backup important data**: Keep backups of critical information
@@ -202,8 +263,11 @@ The API now uses a **PostgreSQL database** as the primary data source. Here are 
    # Start development server
    npm run dev
 
-   # Populate with sample data
+   # Populate with sample data (script method)
    npm run populate:db
+   
+   # Or populate via API (recommended)
+   npm run populate:api
    ```
 
 2. **Database management:**
@@ -215,8 +279,11 @@ The API now uses a **PostgreSQL database** as the primary data source. Here are 
    # Test connection
    npm run test:connection
 
-   # Clean database
+   # Clean database (script method)
    npm run clean:db
+   
+   # Or clean via API
+   npm run clean:api
    ```
 
 3. **Production deployment:**
@@ -241,10 +308,17 @@ The API now uses a **PostgreSQL database** as the primary data source. Here are 
 3. **Data inconsistencies:**
 
    - Compare database vs JSON data
+   - Use populate endpoint to reset from JSON: `POST /classes/populate`
    - Run data validation scripts
    - Check migration status
 
-4. **Performance issues:**
+4. **Emergency data recovery:**
+
+   - Use the populate endpoint to restore from `classes.json`
+   - Check backup files if available
+   - Contact development team for database restore
+
+5. **Performance issues:**
    - Monitor database query performance
    - Check indexes on frequently queried columns
    - Optimize API response caching

@@ -495,6 +495,328 @@ class Subject {
       }
     }
   }
+
+  static async clean() {
+    let client;
+    try {
+      client = await database.getNewClient();
+      await client.query("BEGIN");
+
+      await client.query("DELETE FROM class_schedules");
+      await client.query("DELETE FROM class_groups");
+      await client.query("DELETE FROM subjects");
+      await client.query("DELETE FROM teachers");
+      await client.query("DELETE FROM classrooms");
+
+      await client.query("COMMIT");
+      console.log("✅ Database cleaned successfully");
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
+      console.error("❌ Clean failed:", error);
+      throw error;
+    } finally {
+      if (client) {
+        await client.end();
+      }
+    }
+  }
+
+  static async populate() {
+    let client;
+    const results = {
+      created: [],
+      errors: [],
+      summary: {
+        subjects: 0,
+        teachers: 0,
+        classrooms: 0,
+        classGroups: 0,
+        schedules: 0,
+      },
+    };
+
+    try {
+      const classesData = require("../data/classes.json");
+
+      if (!classesData || !Array.isArray(classesData)) {
+        throw new Error("Invalid classes.json format - expected an array");
+      }
+
+      client = await database.getNewClient();
+      await client.query("BEGIN");
+
+      console.log("🔄 Starting database population from classes.json...");
+
+      const teachersMap = new Map();
+      const classroomsMap = new Map();
+      const subjectsMap = new Map();
+      const classGroupsMap = new Map();
+
+      const validClassesData = classesData.filter(
+        (classData) =>
+          classData &&
+          classData.name &&
+          classData.description &&
+          classData.semester !== undefined
+      );
+
+      console.log(
+        `📚 Found ${validClassesData.length} valid subjects in classes.json`
+      );
+
+      for (const classData of validClassesData) {
+        try {
+          const result = await client.query(
+            `
+            INSERT INTO subjects (code, name, semester, multi_class, on_strike)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
+          `,
+            [
+              classData.name,
+              classData.description,
+              classData.semester,
+              classData.multiClass || false,
+              classData.greve || false,
+            ]
+          );
+
+          const subjectId = result.rows[0].id;
+          subjectsMap.set(classData.name, subjectId);
+          results.summary.subjects++;
+
+          results.created.push({
+            name: classData.name,
+            description: classData.description,
+            semester: classData.semester,
+          });
+
+          console.log(`✅ Created subject: ${classData.name}`);
+        } catch (error) {
+          results.errors.push({
+            name: classData.name,
+            reason: `Failed to create subject: ${error.message}`,
+          });
+          console.error(
+            `❌ Failed to create subject ${classData.name}:`,
+            error.message
+          );
+        }
+      }
+
+      for (const classData of validClassesData) {
+        try {
+          const subjectId = subjectsMap.get(classData.name);
+          if (!subjectId) continue;
+
+          if (
+            classData.multiClass &&
+            classData.classList &&
+            classData.classList.length > 0
+          ) {
+            for (const groupCode of classData.classList) {
+              const groupResult = await client.query(
+                `
+                INSERT INTO class_groups (subject_id, group_code)
+                VALUES ($1, $2)
+                RETURNING id
+              `,
+                [subjectId, groupCode]
+              );
+
+              classGroupsMap.set(
+                `${classData.name}-${groupCode}`,
+                groupResult.rows[0].id
+              );
+              results.summary.classGroups++;
+            }
+          } else {
+            const groupResult = await client.query(
+              `
+              INSERT INTO class_groups (subject_id, group_code)
+              VALUES ($1, $2)
+              RETURNING id
+            `,
+              [subjectId, "DEFAULT"]
+            );
+
+            classGroupsMap.set(
+              `${classData.name}-DEFAULT`,
+              groupResult.rows[0].id
+            );
+            results.summary.classGroups++;
+          }
+
+          if (
+            classData.classes &&
+            Array.isArray(classData.classes) &&
+            classData.classes.length > 0
+          ) {
+            for (const schedule of classData.classes) {
+              try {
+                if (
+                  !schedule.teacher ||
+                  !schedule.classroom ||
+                  !schedule.weekDay ||
+                  !schedule.period
+                ) {
+                  console.warn(
+                    `⚠️ Skipping invalid schedule for ${classData.name}`
+                  );
+                  continue;
+                }
+
+                if (!teachersMap.has(schedule.teacher)) {
+                  const existingTeacher = await client.query(
+                    `
+                    SELECT id FROM teachers WHERE name = $1
+                  `,
+                    [schedule.teacher]
+                  );
+
+                  if (existingTeacher.rows.length > 0) {
+                    teachersMap.set(
+                      schedule.teacher,
+                      existingTeacher.rows[0].id
+                    );
+                  } else {
+                    const teacherResult = await client.query(
+                      `
+                      INSERT INTO teachers (name)
+                      VALUES ($1)
+                      RETURNING id
+                    `,
+                      [schedule.teacher]
+                    );
+
+                    teachersMap.set(schedule.teacher, teacherResult.rows[0].id);
+                    results.summary.teachers++;
+                  }
+                }
+
+                if (!classroomsMap.has(schedule.classroom)) {
+                  const existingClassroom = await client.query(
+                    `
+                    SELECT id FROM classrooms WHERE name = $1
+                  `,
+                    [schedule.classroom]
+                  );
+
+                  if (existingClassroom.rows.length > 0) {
+                    classroomsMap.set(
+                      schedule.classroom,
+                      existingClassroom.rows[0].id
+                    );
+                  } else {
+                    const classroomResult = await client.query(
+                      `
+                      INSERT INTO classrooms (name)
+                      VALUES ($1)
+                      RETURNING id
+                    `,
+                      [schedule.classroom]
+                    );
+
+                    classroomsMap.set(
+                      schedule.classroom,
+                      classroomResult.rows[0].id
+                    );
+                    results.summary.classrooms++;
+                  }
+                }
+
+                const groupKey = schedule.whichClass
+                  ? `${classData.name}-${schedule.whichClass}`
+                  : `${classData.name}-DEFAULT`;
+
+                const classGroupId = classGroupsMap.get(groupKey);
+                if (!classGroupId) {
+                  results.errors.push({
+                    name: classData.name,
+                    reason: `Class group '${
+                      schedule.whichClass || "DEFAULT"
+                    }' not found for schedule`,
+                  });
+                  continue;
+                }
+
+                const teacherId = teachersMap.get(schedule.teacher);
+                const classroomId = classroomsMap.get(schedule.classroom);
+
+                const startPeriod = parseInt(schedule.period[0]);
+                const endPeriod = parseInt(
+                  schedule.period[schedule.period.length - 1]
+                );
+
+                await client.query(
+                  `
+                  INSERT INTO class_schedules (
+                    subject_id, class_group_id, teacher_id, classroom_id,
+                    week_day, start_period, end_period
+                  )
+                  VALUES ($1, $2, $3, $4, $5, $6, $7)
+                `,
+                  [
+                    subjectId,
+                    classGroupId,
+                    teacherId,
+                    classroomId,
+                    parseInt(schedule.weekDay),
+                    startPeriod,
+                    endPeriod,
+                  ]
+                );
+
+                results.summary.schedules++;
+              } catch (scheduleError) {
+                results.errors.push({
+                  name: classData.name,
+                  reason: `Failed to create schedule: ${scheduleError.message}`,
+                });
+                console.error(
+                  `❌ Failed to create schedule for ${classData.name}:`,
+                  scheduleError.message
+                );
+              }
+            }
+          }
+        } catch (classError) {
+          results.errors.push({
+            name: classData.name,
+            reason: `Failed to process class: ${classError.message}`,
+          });
+          console.error(
+            `❌ Failed to process class ${classData.name}:`,
+            classError.message
+          );
+        }
+      }
+
+      await client.query("COMMIT");
+
+      console.log("✅ Database population completed successfully!");
+      console.log(`📊 Summary:`);
+      console.log(`   - Subjects: ${results.summary.subjects}`);
+      console.log(`   - Teachers: ${results.summary.teachers}`);
+      console.log(`   - Classrooms: ${results.summary.classrooms}`);
+      console.log(`   - Class Groups: ${results.summary.classGroups}`);
+      console.log(`   - Schedules: ${results.summary.schedules}`);
+
+      return results;
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
+      console.error("❌ Population failed:", error);
+      throw error;
+    } finally {
+      if (client) {
+        await client.end();
+      }
+    }
+  }
 }
 
 module.exports = Subject;

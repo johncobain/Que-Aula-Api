@@ -183,10 +183,59 @@ const deleteClass = async (req, res) => {
   }
 };
 
+const clean = async (req, res) => {
+  try {
+    await Subject.clean();
+    return res.status(200).json({
+      message: "Database cleaned successfully",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error cleaning database:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to clean database",
+      details: error.message,
+    });
+  }
+};
+
+const populate = async (req, res) => {
+  try {
+    console.log("Starting database population via API...");
+
+    await Subject.clean();
+    console.log("Database cleaned");
+
+    const results = await Subject.populate();
+
+    return res.status(200).json({
+      message: "Database populated successfully from classes.json",
+      timestamp: new Date().toISOString(),
+      summary: results.summary,
+      created: results.created.length,
+      errors: results.errors.length,
+      details: {
+        createdSubjects: results.created,
+        errors: results.errors,
+      },
+    });
+  } catch (error) {
+    console.error("Error populating database:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to populate database",
+      details: error.message,
+    });
+  }
+};
+
 module.exports = {
   list,
   get,
   create,
   update,
   delete: deleteClass,
+  populate,
+  clean,
 };
