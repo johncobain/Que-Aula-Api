@@ -538,7 +538,7 @@
         "weekDay": "1",
         "period": ["2", "3"],
         "teacher": "Sandro Andrade",
-        "classroom": "BLOCO E - Lab. 03"
+        "classroom": "BLOCO E - Lab. 02"
       },
       {
         "weekDay": "2",
@@ -571,7 +571,7 @@
         "weekDay": "2",
         "period": ["2", "3"],
         "teacher": "Flávia Maristela",
-        "classroom": "BLOCO O - Sala 3 (2º Andar)"
+        "classroom": "BLOCO D - Sala 2 (2º Andar)"
       },
       {
         "weekDay": "4",
@@ -593,7 +593,7 @@
         "weekDay": "1",
         "period": ["4", "5"],
         "teacher": "Ronaldo Pedreira",
-        "classroom": "BLOCO E - Lab. 01",
+        "classroom": "BLOCO D - Sala 2 (1º Andar)",
         "whichClass": "T01"
       },
       {
@@ -631,14 +631,14 @@
         "weekDay": "1",
         "period": ["2", "3"],
         "teacher": "Washington Laranjeiras",
-        "classroom": "BLOCO D - Sala 1 (2º Andar)",
+        "classroom": "BLOCO D - Sala 6 (1º Andar)",
         "whichClass": "T03"
       },
       {
         "weekDay": "4",
         "period": ["2", "3"],
         "teacher": "Washington Laranjeiras",
-        "classroom": "BLOCO D - Sala 1 (2º Andar)",
+        "classroom": "BLOCO D - Sala 6 (1º Andar)",
         "whichClass": "T03"
       }
     ]
@@ -777,7 +777,7 @@
         "weekDay": "4",
         "period": ["4", "5"],
         "teacher": "Antonio Carlos Souza",
-        "classroom": "BLOCO O - Sala 6 (2º Andar)"
+        "classroom": "BLOCO L - Lab. Inf. 5 (1º Andar)"
       }
     ]
   },
@@ -806,23 +806,14 @@
     "name": "INF030",
     "description": "Métodos Científicos em Computação",
     "semester": "5",
-    "multiClass": true,
-    "classList": ["T01", "T02"],
+    "multiClass": false,
     "greve": false,
     "classes": [
       {
         "weekDay": "1",
         "period": ["4", "5"],
         "teacher": "Pablo Florentino",
-        "classroom": "BLOCO E - Lab. 03",
-        "whichClass": "T01"
-      },
-      {
-        "weekDay": "5",
-        "period": ["2", "3"],
-        "teacher": "Pablo Florentino",
-        "classroom": "BLOCO E - Lab. 03",
-        "whichClass": "T02"
+        "classroom": "BLOCO E - Lab. 03"
       }
     ]
   },
@@ -843,23 +834,23 @@
       },
       {
         "weekDay": "4",
-        "period": ["2", "3"],
+        "period": ["4", "5"],
         "teacher": "Katia Elizabeth",
-        "classroom": "BLOCO O - Sala 1 (1º Andar)",
+        "classroom": "BLOCO O - ITCP/ Observatório do Trabalho/ GP Trabalho, Desenvolvimento e Tec. Sociais (40)",
         "whichClass": "T01"
       },
       {
         "weekDay": "1",
         "period": ["0", "1"],
         "teacher": "Maria Sampaio",
-        "classroom": "-----",
+        "classroom": "BLOCO O - Sala 1 (1º Andar)",
         "whichClass": "T02"
       },
       {
         "weekDay": "3",
         "period": ["4", "5"],
         "teacher": "Maria Sampaio",
-        "classroom": "-----",
+        "classroom": "BLOCO O - Sala 1 (2º Andar)",
         "whichClass": "T02"
       }
     ]
@@ -875,13 +866,13 @@
         "weekDay": "1",
         "period": ["2", "3"],
         "teacher": "Maria Lucileide",
-        "classroom": "BLOCO L - Sala 1 (1º Andar)"
+        "classroom": "Bloco D - Sala 5 (1º Andar)"
       },
       {
         "weekDay": "2",
         "period": ["4", "5"],
         "teacher": "Maria Lucileide",
-        "classroom": "BLOCO L - Sala 3 (1º Andar)"
+        "classroom": "Bloco D - Sala 5 (1º Andar)"
       }
     ]
   },
@@ -942,31 +933,17 @@
     "greve": false,
     "classes": [
       {
-        "weekDay": "3",
-        "period": ["0", "1"],
-        "teacher": "Jowaner Araujo",
-        "classroom": "BLOCO E - Lab. 02",
-        "whichClass": "T01"
-      },
-      {
         "weekDay": "5",
         "period": ["2", "3"],
         "teacher": "Jowaner Araujo",
-        "classroom": "BLOCO E - Lab. 02",
+        "classroom": "BLOCO L - Sala 1 (1º Andar)",
         "whichClass": "T01"
-      },
-      {
-        "weekDay": "3",
-        "period": ["4", "5"],
-        "teacher": "Lauro Paula",
-        "classroom": "BLOCO L - Sala 7 (2º Andar)",
-        "whichClass": "T02"
       },
       {
         "weekDay": "5",
         "period": ["4", "5"],
-        "teacher": "Lauro Paula",
-        "classroom": "BLOCO L - Sala 7 (2º Andar) ",
+        "teacher": "Jowaner Araujo",
+        "classroom": "BLOCO L - Sala 1 (1º Andar)",
         "whichClass": "T02"
       }
     ]
