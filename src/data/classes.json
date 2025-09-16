@@ -829,7 +829,7 @@
         "weekDay": "3",
         "period": ["2", "3"],
         "teacher": "Katia Elizabeth",
-        "classroom": "BLOCO O - Sala 1 (1º Andar)",
+        "classroom": "BLOCO O - Sala 1 (2º Andar)",
         "whichClass": "T01"
       },
       {
@@ -933,11 +933,25 @@
     "greve": false,
     "classes": [
       {
+        "weekDay": "3",
+        "period": ["0", "1"],
+        "teacher": "Jowaner Araujo",
+        "classroom": "BLOCO E - Lab. 02",
+        "whichClass": "T01"
+      },
+      {
         "weekDay": "5",
         "period": ["2", "3"],
         "teacher": "Jowaner Araujo",
         "classroom": "BLOCO L - Sala 1 (1º Andar)",
         "whichClass": "T01"
+      },
+      {
+        "weekDay": "3",
+        "period": ["4", "5"],
+        "teacher": "Jowaner Araujo",
+        "classroom": "BLOCO L - Sala 3 (1º Andar)",
+        "whichClass": "T02"
       },
       {
         "weekDay": "5",
