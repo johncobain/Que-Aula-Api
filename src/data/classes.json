@@ -170,6 +170,27 @@
     ]
   },
   {
+    "name": "LET105",
+    "description": "Espanhol Instrumental",
+    "semester": "0",
+    "multiClass": false,
+    "greve": false,
+    "classes": [
+      {
+        "weekDay": "1",
+        "period": ["4", "5"],
+        "teacher": "Deise Viana Ferreira",
+        "classroom": "BLOCO L - 003 Centro de Idiomas"
+      },
+      {
+        "weekDay": "3",
+        "period": ["2", "3"],
+        "teacher": "Deise Viana Ferreira",
+        "classroom": "BLOCO L - Sala 5 (1º Andar)"
+      }
+    ]
+  },
+  {
     "name": "LET112",
     "description": "LIBRAS",
     "semester": "0",
