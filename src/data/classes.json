@@ -150,7 +150,7 @@
         "weekDay": "5",
         "period": ["0", "1", "2", "3"],
         "teacher": "Domingos Mainart",
-        "classroom": "BLOCO E - Lab. 01",
+        "classroom": "BLOCO L - Lab. Inf. 5 (1º Andar)",
         "whichClass": "T01"
       },
       {
@@ -859,7 +859,7 @@
         "weekDay": "5",
         "period": ["2", "3"],
         "teacher": "Renato Novais",
-        "classroom": "LOCO L - Lab. Inf. 5 (1º Andar)"
+        "classroom": "BLOCO L - Lab. Inf. 5 (1º Andar)"
       }
     ]
   },
@@ -867,14 +867,23 @@
     "name": "INF030",
     "description": "Métodos Científicos em Computação",
     "semester": "5",
-    "multiClass": false,
+    "multiClass": true,
+    "classList": ["T01", "T02"],
     "greve": false,
     "classes": [
       {
         "weekDay": "1",
         "period": ["4", "5"],
         "teacher": "Pablo Florentino",
-        "classroom": "BLOCO E - Lab. 03"
+        "classroom": "BLOCO E - Lab. 03",
+        "whichClass": "T01"
+      },
+      {
+        "weekDay": "4",
+        "period": ["2", "3"],
+        "teacher": "Pablo Florentino",
+        "classroom": "BLOCO O - Lab. Informática de ADM (20)",
+        "whichClass": "T02"
       }
     ]
   },
